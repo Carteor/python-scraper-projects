@@ -65,9 +65,25 @@ page_number_element = driver.find_element(By.XPATH,
 page_number = math.ceil(int(page_number_element.text.split()[2].replace(',', '')) / 50)
 print(page_number)
 
-load_pages(2, driver)
+# load_pages(2, driver)
 
-# movie_list = scrape_page(driver)
-# print(movie_list)
+movie_list = scrape_page(driver)
+print(movie_list)
+
+# TODO: implement
+#  Genres
+# data-testid="storyline-genres"
+#  Release Year
+release_year = driver.find_element(By.XPATH,
+                                   '//*[@id="__next"]/main/div/section[1]/section/div[3]/section/section/div[2]/div[1]/ul/li[1]/a')
+#  Ratings
+ratings = driver.find_element(By.XPATH,
+                              '//*[@id="__next"]/main/div/section[1]/section/div[3]/section/section/div[3]/div[2]/div[2]/div[1]/div/div[1]/a/span/div/div[2]/div[1]/span[1]')
+#  Box Office
+box_office = driver.find_element(By.XPATH,
+                                 '//*[@id="__next"]/main/div/section[1]/div/section/div/div[1]/section[12]/div[2]/ul/li[4]/div/ul/li/span')
+#  YouTube Trailer Link
+trailer_link = driver.find_element(By.XPATH,
+                                   '//*[@id="__next"]/main/div/section[1]/section/div[3]/section/section/div[3]/div[1]/div[2]/div[2]/a[2]')
 
 driver.quit()
