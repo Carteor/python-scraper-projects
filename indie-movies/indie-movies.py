@@ -2,8 +2,11 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import ActionChains
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 import math
+import time
 
 
 def scrape_page(driver):
@@ -33,13 +36,19 @@ def scrape_page(driver):
     return movies_list
 
 
+# TODO: implement dynamic loading of required number of pages
 def load_pages(page_number, driver):
     print("load_pages()")
     for i in range(2):
-        see_more_button = driver.find_element(By.CSS_SELECTOR,
-                                              'button.ipc-see-more__button')
+        see_more_button = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.CSS_SELECTOR,
+                                              'button.ipc-see-more__button'))
+        )
+
         ActionChains(driver).move_to_element(see_more_button).perform()
 
+        time.sleep(10)
+        # see_more_button.click()
 
 
 url = 'https://www.imdb.com/search/title/?sort=release_date,desc&keywords=independent-film'
@@ -56,9 +65,9 @@ page_number_element = driver.find_element(By.XPATH,
 page_number = math.ceil(int(page_number_element.text.split()[2].replace(',', '')) / 50)
 print(page_number)
 
-# load_pages(2, driver)
+load_pages(2, driver)
 
-movie_list = scrape_page(driver)
-print(movie_list)
+# movie_list = scrape_page(driver)
+# print(movie_list)
 
 driver.quit()
