@@ -1,12 +1,83 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 import math
 import time
+
+
+def scrape_details(driver, movie_url='https://www.imdb.com/title/tt0335345/'):
+    driver.get(movie_url)
+
+    photos_section = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located(
+            (By.CSS_SELECTOR,
+             'section[data-testid="Photos"]')
+        )
+    )
+    driver.execute_script("arguments[0].scrollIntoView();",
+                          photos_section)
+
+    # Scroll to Storyline element to start loading remaining data
+    storyline_element = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located(
+            (By.CSS_SELECTOR,
+             '#__next > main > div > section.ipc-page-background.ipc-page-background--base.sc-304f99f6-0.fSJiHR > div > section > div > div.sc-a83bf66d-1.gYStnb.ipc-page-grid__item.ipc-page-grid__item--span-2 > section:nth-child(25) > div.ipc-title.ipc-title--base.ipc-title--section-title.ipc-title--on-textPrimary > div > hgroup > h3 > span')
+        )
+    )
+
+
+    # Use Javascript to avoid bugs
+    driver.execute_script("arguments[0].scrollIntoView();",
+                          storyline_element)
+    # Take a break to load the element
+    time.sleep(5)
+
+    #  Genres
+    genres_element = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located(
+            (By.XPATH,
+             '//*[@id="__next"]/main/div/section[1]/div/section/div/div[1]/section[6]/div[2]/ul[2]/li[2]/div/ul')
+        )
+    )
+    genres = genres_element.text
+    # print(genres)
+
+    #  Release Year
+    release_year_element = driver.find_element(By.XPATH,
+                                               '//*[@id="__next"]/main/div/section[1]/section/div[3]/section/section/div[2]/div[1]/ul/li[1]/a')
+    release_year = release_year_element.text
+    # print(release_year)
+
+    #  Ratings
+    ratings_element = driver.find_element(
+        By.CSS_SELECTOR,
+        'div[data-testid="hero-rating-bar__aggregate-rating__score"]')
+    ratings = ratings_element.text.replace('\n', '')
+    # print(f'ratings: \'{ratings.strip()}\'')
+
+    #  Box Office
+    box_office_element = driver.find_element(By.XPATH,
+                                             '//*[@id="__next"]/main/div/section[1]/div/section/div/div[1]/section[12]/div[2]/ul/li[4]/div/ul/li/span')
+    box_office = box_office_element.text
+    # print(box_office)
+
+    # #  YouTube Trailer Link
+    trailer_link_element = driver.find_element(By.XPATH,
+                                               '//*[@id="__next"]/main/div/section[1]/section/div[3]/section/section/div[3]/div[1]/div[2]/div[2]/a[2]')
+    trailer_link = trailer_link_element.get_attribute('href')
+    # print(trailer_link)
+
+    return {
+        'genres:': genres,
+        'release_year': release_year,
+        'ratings': ratings,
+        'box_office': box_office,
+        'trailer_link': trailer_link
+    }
 
 
 def scrape_page(driver):
@@ -29,9 +100,16 @@ def scrape_page(driver):
 
         url = movie.find_element(By.CSS_SELECTOR, 'a.ipc-title-link-wrapper').get_attribute('href')
 
-        movies_list.append({'title': title,
-                            'description': description,
-                            'url': url})
+        x = {
+            'title': title,
+            'description': description,
+            'url': url}
+
+        y = scrape_details(driver, url)
+
+        z = {**x, **y}
+
+        movies_list.append(z)
 
     return movies_list
 
@@ -54,7 +132,8 @@ def load_pages(page_number, driver):
 url = 'https://www.imdb.com/search/title/?sort=release_date,desc&keywords=independent-film'
 
 driver = webdriver.Chrome()
-driver.implicitly_wait(1)
+driver.implicitly_wait(10)
+
 driver.get(url)
 
 title = driver.title
@@ -69,21 +148,5 @@ print(page_number)
 
 movie_list = scrape_page(driver)
 print(movie_list)
-
-# TODO: implement
-#  Genres
-# data-testid="storyline-genres"
-#  Release Year
-release_year = driver.find_element(By.XPATH,
-                                   '//*[@id="__next"]/main/div/section[1]/section/div[3]/section/section/div[2]/div[1]/ul/li[1]/a')
-#  Ratings
-ratings = driver.find_element(By.XPATH,
-                              '//*[@id="__next"]/main/div/section[1]/section/div[3]/section/section/div[3]/div[2]/div[2]/div[1]/div/div[1]/a/span/div/div[2]/div[1]/span[1]')
-#  Box Office
-box_office = driver.find_element(By.XPATH,
-                                 '//*[@id="__next"]/main/div/section[1]/div/section/div/div[1]/section[12]/div[2]/ul/li[4]/div/ul/li/span')
-#  YouTube Trailer Link
-trailer_link = driver.find_element(By.XPATH,
-                                   '//*[@id="__next"]/main/div/section[1]/section/div[3]/section/section/div[3]/div[1]/div[2]/div[2]/a[2]')
 
 driver.quit()
