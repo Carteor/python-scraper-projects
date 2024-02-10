@@ -9,6 +9,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 
 import math
+import pandas as pd
 
 
 def scrape_listing(driver):
@@ -102,14 +103,18 @@ driver.execute_script("arguments[0].remove();", interceptor_element)
 
 unique_link_texts = set()
 
-entries_number_element = driver.find_element(
-    By.CSS_SELECTOR,
-    '#onlineGuide > div > div.EWP5KKC-e-I > div:nth-child(1) > div:nth-child(2) > div.EWP5KKC-u-b > div.EWP5KKC-u-e')
+entries_number_element = WebDriverWait(driver, 10).until(
+    EC.presence_of_element_located((
+        By.CSS_SELECTOR,
+        '#onlineGuide > div > div.EWP5KKC-e-I > div:nth-child(1) > div:nth-child(2) > div.EWP5KKC-u-b > div.EWP5KKC-u-e'
+    ))
+)
 entries_number = entries_number_element.text.split()[0]
 max_entries_number = entries_number_element.text.split()[2]
 print(f'{entries_number} of {max_entries_number}')
 pages = math.ceil(int(max_entries_number)/int(entries_number))
 
+listings = []
 for p in range(pages+1):
     print(f'Page: {p}')
 
@@ -134,9 +139,16 @@ for p in range(pages+1):
 
             listing_element.click()
             listing_data = scrape_listing(driver)
+            listings.append(listing_data)
+
             print(listing_data)
+
+            df = pd.DataFrame(listings)
+            df.to_csv('output.csv', index=False)
+            print('saved to csv')
         else:
             print('not an unique element, moving along...')
+
 
 
     show_more_button = driver.find_element(
