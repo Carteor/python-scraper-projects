@@ -64,6 +64,12 @@ def scrape_listing(driver):
         'Product groups': product_groups,
     }
 
+    close_button = driver.find_element(
+        By.CSS_SELECTOR,
+        '#onlineGuidePopup > div > div > div.xIcon.EWP5KKC-y-l'
+    )
+    close_button.click()
+
     print(listing_data)
     return listing_data
 
@@ -90,11 +96,15 @@ print('interception element located')
 # Let's try deleting the intercepting element from DOM using Javascript
 driver.execute_script("arguments[0].remove();", interceptor_element)
 
-listing_element = driver.find_element(
+listing_elements = driver.find_elements(
     By.CSS_SELECTOR,
-    '#onlineGuide > div > div.EWP5KKC-e-I > div:nth-child(1) > div:nth-child(2) > div.listContentContainer > div > div.EWP5KKC-e-J > div:nth-child(1)'
+    '#onlineGuide > div > div.EWP5KKC-e-I > div:nth-child(1) > div:nth-child(2) > div.listContentContainer > div > div.EWP5KKC-e-J > div'
 )
-listing_element.click()
+print(f'len: {len(listing_elements)}')
 
-print(scrape_listing(driver))
+for listing_element in listing_elements:
+    listing_element.click()
+
+    print(scrape_listing(driver))
+    time.sleep(1)
 
