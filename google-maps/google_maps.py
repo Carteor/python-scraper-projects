@@ -119,7 +119,8 @@ for i in range(20):
     for listing in listings:
         aria_label = listing.get_attribute('aria-label')
 
-        WebDriverWait(driver, 10).until(EC.element_to_be_clickable(listing))
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable(listing))
         ActionChains(driver).move_to_element(listing).perform()
 
         if aria_label not in unique_labels:

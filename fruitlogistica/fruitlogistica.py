@@ -5,6 +5,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
+
+import math
 
 
 def scrape_listing(driver):
@@ -70,7 +74,6 @@ def scrape_listing(driver):
     )
     close_button.click()
 
-    print(listing_data)
     return listing_data
 
 
@@ -96,15 +99,48 @@ print('interception element located')
 # Let's try deleting the intercepting element from DOM using Javascript
 driver.execute_script("arguments[0].remove();", interceptor_element)
 
-listing_elements = driver.find_elements(
+
+unique_link_texts = set()
+
+entries_number_element = driver.find_element(
     By.CSS_SELECTOR,
-    '#onlineGuide > div > div.EWP5KKC-e-I > div:nth-child(1) > div:nth-child(2) > div.listContentContainer > div > div.EWP5KKC-e-J > div'
-)
-print(f'len: {len(listing_elements)}')
+    '#onlineGuide > div > div.EWP5KKC-e-I > div:nth-child(1) > div:nth-child(2) > div.EWP5KKC-u-b > div.EWP5KKC-u-e')
+entries_number = entries_number_element.text.split()[0]
+max_entries_number = entries_number_element.text.split()[2]
+print(f'{entries_number} of {max_entries_number}')
+pages = math.ceil(int(max_entries_number)/int(entries_number))
 
-for listing_element in listing_elements:
-    listing_element.click()
+for p in range(pages+1):
+    print(f'Page: {p}')
 
-    print(scrape_listing(driver))
-    time.sleep(1)
+    listing_elements = driver.find_elements(
+        By.CSS_SELECTOR,
+        '#onlineGuide > div > div.EWP5KKC-e-I > div:nth-child(1) > div:nth-child(2) > div.listContentContainer > div > div.EWP5KKC-e-J > div'
+    )
+    print(f'len(listing_elements): {len(listing_elements)}')
 
+    for listing_element in listing_elements[len(unique_link_texts):]:
+        link_text = listing_element.find_elements(
+            By.CSS_SELECTOR,
+            'a.gwt-Anchor')[-1].get_attribute('href')
+        print(f'link_text: {link_text}')
+
+        # WebDriverWait(driver, 10).until(EC.element_to_be_clickable(listing_element))
+        ActionChains(driver).move_to_element(listing_element).perform()
+
+        if link_text not in unique_link_texts:
+            print('unique element')
+            unique_link_texts.add(link_text)
+
+            listing_element.click()
+            listing_data = scrape_listing(driver)
+            print(listing_data)
+        else:
+            print('not an unique element, moving along...')
+
+
+    show_more_button = driver.find_element(
+        By.CSS_SELECTOR,
+        '#onlineGuide > div > div.EWP5KKC-e-I > div:nth-child(1) > div:nth-child(2) > div.EWP5KKC-u-b > div.EWP5KKC-u-c'
+    )
+    show_more_button.click()
