@@ -12,5 +12,5 @@ Opens google maps, searches for the "business + location" and then scrapes all r
 4. Fruitlogistica
 Scrapes data from fruitlogistica about participants
 
-5. Tradingview scraper
-scrapes data about strategies
+5. Glassdoor scraper
+Scrapes data about companies
