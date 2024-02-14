@@ -2,6 +2,8 @@ import time
 import warnings
 import math
 
+import pandas as pd
+
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 from selenium import webdriver
@@ -26,6 +28,8 @@ def scrape_details(driver):
         )
     )
     name = name_element.text
+
+    print(f'Currently scraping {name}')
 
     # Average review score
     review_score_element = driver.find_element(
@@ -98,14 +102,23 @@ def remove_popup():
 
 
 def parse_page():
+    current_page = driver.current_url
+    print(f'current parsing {current_page}')
+
     listing_elements_by = 'div[data-test="employer-card-single"]'
     listing_elements = driver.find_elements(
         By.CSS_SELECTOR,
         listing_elements_by
     )
     length = len(listing_elements)
+    print(f'Number of elements on this page: {length}')
 
-    for index, listing_element in enumerate(listing_elements[length - 2::]):
+    master_list_page = []
+    for index, listing_element in enumerate(listing_elements
+                                            [length - 2::]
+                                            ):
+        print(f'enumerate index: {index}')
+
         try:
             listing_element.click()
         except StaleElementReferenceException:
@@ -124,7 +137,10 @@ def parse_page():
             )[index]
             listing_element.click()
 
-        print(scrape_details(driver))
+        page_data = scrape_details(driver)
+        master_list_page.append(page_data)
+
+    return master_list_page
 
 
 url = 'https://www.glassdoor.com/Reviews/index.htm'
@@ -157,11 +173,19 @@ print(company_number)
 max_page_number = math.ceil(company_number/10)
 print(max_page_number)
 
-current_url = driver.current_url
+
 # print(current_url)
 
+master_list = []
 for i in range(1, max_page_number):
+    current_url = driver.current_url
     current_url = current_url.replace('page=1', f'page={i}')
-    print(current_url)
+    print(f'Currently parsing page: {i}, url: {current_url}')
     driver.get(current_url)
-    parse_page()
+
+    data = parse_page()
+
+    master_list.extend(data)
+
+    df = pd.DataFrame(master_list)
+    df.to_json('output.json', index=False)
