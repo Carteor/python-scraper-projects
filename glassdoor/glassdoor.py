@@ -1,5 +1,6 @@
 import time
 import warnings
+import math
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -96,6 +97,36 @@ def remove_popup():
         answer_buttons[0].click()
 
 
+def parse_page():
+    listing_elements_by = 'div[data-test="employer-card-single"]'
+    listing_elements = driver.find_elements(
+        By.CSS_SELECTOR,
+        listing_elements_by
+    )
+    length = len(listing_elements)
+
+    for index, listing_element in enumerate(listing_elements[length - 2::]):
+        try:
+            listing_element.click()
+        except StaleElementReferenceException:
+            print("Caught StaleElementReferenceException")
+            listing_element = driver.find_elements(
+                By.CSS_SELECTOR,
+                listing_elements_by
+            )[index]
+            listing_element.click()
+        except ElementClickInterceptedException:
+            print("Caught ElementClickInterceptedException")
+            remove_popup()
+            listing_element = driver.find_elements(
+                By.CSS_SELECTOR,
+                listing_elements_by
+            )[index]
+            listing_element.click()
+
+        print(scrape_details(driver))
+
+
 url = 'https://www.glassdoor.com/Reviews/index.htm'
 
 driver = webdriver.Chrome()
@@ -116,32 +147,21 @@ input_element = driver.find_element(
 input_element.send_keys(f'{city}, {location}')
 input_element.send_keys(Keys.ENTER)
 
-listing_elements_by ='div[data-test="employer-card-single"]'
-listing_elements = driver.find_elements(
+company_number_element = driver.find_element(
     By.CSS_SELECTOR,
-    listing_elements_by
+    'div.d-none.d-md-block.py-xxl.px-std > span > span > strong:nth-child(3)'
 )
+company_number = int(company_number_element.text.replace(',', ''))
+print(company_number)
 
-for index, listing_element in enumerate(listing_elements):
-    try:
-        listing_element.click()
-    except StaleElementReferenceException:
-        print("Caught StaleElementReferenceException")
-        listing_element = driver.find_elements(
-            By.CSS_SELECTOR,
-            listing_elements_by
-        )[index]
-        listing_element.click()
-    except ElementClickInterceptedException:
-        print("Caught ElementClickInterceptedException")
-        remove_popup()
-        listing_element = driver.find_elements(
-            By.CSS_SELECTOR,
-            listing_elements_by
-        )[index]
-        listing_element.click()
+max_page_number = math.ceil(company_number/10)
+print(max_page_number)
 
-    print(scrape_details(driver))
+current_url = driver.current_url
+# print(current_url)
 
-
-
+for i in range(1, max_page_number):
+    current_url = current_url.replace('page=1', f'page={i}')
+    print(current_url)
+    driver.get(current_url)
+    parse_page()
