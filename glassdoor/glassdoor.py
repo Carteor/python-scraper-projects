@@ -139,6 +139,9 @@ def parse_page():
     return master_list_page
 
 
+city = input("City: ")
+location = input("Location: ")
+
 url = 'https://www.glassdoor.com/Reviews/index.htm'
 
 driver = webdriver.Chrome()
@@ -149,8 +152,10 @@ print(driver.title)
 
 #input the City, Location
 #placeholder for development
-city = "New York"
-location = "US"
+# city = "New York"
+# location = "US"
+
+
 
 input_element = driver.find_element(
     By.CSS_SELECTOR,
