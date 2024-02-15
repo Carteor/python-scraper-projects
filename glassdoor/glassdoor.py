@@ -1,16 +1,12 @@
-import time
-import warnings
 import math
+import re
 
 import pandas as pd
-
-warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import StaleElementReferenceException, TimeoutException, ElementClickInterceptedException
 
@@ -90,11 +86,11 @@ def remove_popup():
     except TimeoutException:
         intercepting_element = []
 
-    print(f'len: {len(intercepting_element)}')
+    # print(f'len: {len(intercepting_element)}')
 
     if intercepting_element:
-        print("There is a intercepting element")
-        print(len(intercepting_element))
+        # print("There is a intercepting element")
+        # print(len(intercepting_element))
         answer_buttons = intercepting_element[0].find_elements(
            By.CSS_SELECTOR, 'div.qual_x_close')
         # time.sleep(100)
@@ -103,7 +99,7 @@ def remove_popup():
 
 def parse_page():
     current_page = driver.current_url
-    print(f'current parsing {current_page}')
+    print(f'Currently parsing {current_page}')
 
     listing_elements_by = 'div[data-test="employer-card-single"]'
     listing_elements = driver.find_elements(
@@ -115,7 +111,7 @@ def parse_page():
 
     master_list_page = []
     for index, listing_element in enumerate(listing_elements
-                                            [length - 2::]
+                                            # [length - 2::]
                                             ):
         print(f'enumerate index: {index}')
 
@@ -172,14 +168,13 @@ print(company_number)
 
 max_page_number = math.ceil(company_number/10)
 print(max_page_number)
-
-
 # print(current_url)
 
 master_list = []
 for i in range(1, max_page_number):
     current_url = driver.current_url
-    current_url = current_url.replace('page=1', f'page={i}')
+    # Using regexp
+    current_url = re.sub(r'page=\d+', f'page={i}', current_url)
     print(f'Currently parsing page: {i}, url: {current_url}')
     driver.get(current_url)
 
