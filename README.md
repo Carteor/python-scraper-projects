@@ -14,3 +14,11 @@ Scrapes data from fruitlogistica about participants
 
 5. Glassdoor scraper
 Scrapes data about companies
+
+6. Zipcode-minimal
+Fetches the city zip code using selenium
+
+7. Nomadlist scraper
+
+8. Company research tool
+it works but google allows only 100 requests per day so better buy that google premium

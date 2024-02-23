@@ -1,0 +1,10 @@
+{
+    "DE&I": ["Disability / Disabled", "LGBTQ", "Gender representation", "Diversity Inclusion"],
+    "Talent Access": ["Early in career program", "Leadership Development program", "Talent Acquisition", "University Collaboration"],
+    "Learning & development": ["Reskilling / Upskilling", "Learning Management System", "Learning Academy", "Taxonomy", "Talent Development", "Competency"],
+    "Digitalization & Innovation": ["Technology", "Digitalization", "Operational excellence", "E-commerce"],
+    "Organizational Change": ["Organization Structure", "Layoff", "Agility", "Organization Restructure"],
+    "Wellbeing": ["Mental health", "Extended healthcare", "Parental Leave", "Health Risk Assessment", "Transgender support", "Worklife balance"],
+    "ESG": ["Climate change", "Plastic waste", "Water saving", "Bio-degradable", "Minimum wage"],
+    "Employee Engagement": ["Career Development", "Engagement Survey", "Autonomy", "Top Employer Award"]
+}
